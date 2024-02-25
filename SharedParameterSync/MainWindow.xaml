@@ -1,0 +1,200 @@
+﻿<Window x:Class="SharedParameterSync.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:SharedParameterSync"
+    mc:Ignorable="d"
+    WindowStartupLocation="CenterScreen"
+    x:Name="mainWindow"
+    Title="Синхронизация общих параметров"
+    ResizeMode="NoResize"
+    SizeToContent="WidthAndHeight"
+    MinHeight="300"
+    MinWidth="330">
+    <Grid>
+        <StackPanel>
+            
+            <!--Направление "Чтение-запись"-->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0"
+                    d:Text="Запись из Гугла"
+                    Text="{Binding SourceName}"/>
+                <Button Grid.Column="1" 
+                    Content="◀ Развернуть ▶" 
+                    Command="{Binding FlipSourcesCommand}"/>
+                <TextBlock Grid.Column="2"
+                    d:Text="в ФОПу"
+                    Text="{Binding TargetName}"/>
+            </Grid>
+            
+            <!--Список параметров-->
+            <ListView x:Name="itemList"
+                ItemsSource="{Binding Data}"
+                d:ItemsSource="{d:SampleData ItemCount=355}"
+                MinHeight="300"
+                MaxHeight="450">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <Setter Property="IsSelected"
+                                Value="{Binding ChangesAllowed, Mode=TwoWay}" />
+                        <Setter Property="ToolTip" 
+                                Value="{Binding Info}"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.View>
+                    <GridView>
+                        
+                        <!-- Столбец "Обновление" -->
+                        <GridViewColumn Header="Обновления" Width="Auto">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding ChangesAllowed}"
+                                        d:Content="Статус"
+                                        Content="{Binding StatusText}"
+                                        />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+
+                        <!-- Столбец "Имя параметра" -->
+                        <GridViewColumn Header="Имя параметра">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}"
+                                        d:Text="ARO_Имя параметра"
+                                        />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+
+                        <!-- Столбец "Группа" -->
+                        <GridViewColumn Header="Группа">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Group}"
+                                        d:Text="Имя группы"
+                                        />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+
+
+            <!--Кнопки-->
+            <Grid Grid.Row="2" VerticalAlignment="Center">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Separator Grid.Row="0" VerticalAlignment="Top"/>
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0"
+                        Content="❌ Отмена"
+                        IsCancel="True"
+                        Click="CloseButton_Click"
+                        HorizontalAlignment="Left"
+                        />
+                    <Button Grid.Column="1"
+                            Content="Выбрать всё"
+                            Command="{Binding SelectAllCommand}"
+                            />
+                    <Button Grid.Column="2"
+                        IsEnabled="{Binding OkEnabled}"
+                        Content="💾 Записать"
+                        IsDefault="True"
+                        Command="{Binding OkCommand}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
+                        HorizontalAlignment="Right"
+                        />
+                </Grid>
+            </Grid>
+        </StackPanel>
+    </Grid>
+
+    <Window.Resources>
+        <ResourceDictionary
+            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+            <!--Цвета ARO-->
+            <SolidColorBrush x:Key="AroRed" Color="#FB0B1D"/>
+            <SolidColorBrush x:Key="AroDeepBlack" Color="#13100A"/>
+            <SolidColorBrush x:Key="AroDarkGray" Color="#3D3B3C"/>
+            <SolidColorBrush x:Key="AroGray" Color="#898989"/>
+            <SolidColorBrush x:Key="AroLightGray" Color="#BCBCBC"/>
+            <SolidColorBrush x:Key="TransparentBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="SemiTransparentBrush" Color="#7FFFFFFF"/>
+
+            <Style TargetType="{x:Type Window}">
+                <Setter Property="Background" Value="#FFF"/>
+            </Style>
+
+            <!--Кнопки-->
+            <Style TargetType="{x:Type Button}">
+                <Setter Property="Background" Value="White" />
+                <Setter Property="Foreground" Value="{StaticResource AroDeepBlack}" />
+                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Width" Value="100"/>
+                <Setter Property="Margin" Value="5"/>
+                <Style.Triggers>
+                    <Trigger Property="IsDefault" Value="True">
+                        <Setter Property="Background" Value="{StaticResource AroRed}" />
+                        <Setter Property="Foreground" Value="White"/>
+                    </Trigger>
+                    <Trigger Property="IsCancel" Value="True">
+                        <Setter Property="Background" Value="White" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style TargetType="{x:Type Label}">
+                <Setter Property="Foreground" Value="{StaticResource AroDarkGray}"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Margin" Value="0 5 0 0"/>
+            </Style>
+            <Style TargetType="{x:Type Label}" x:Key="InputLabel" BasedOn="{StaticResource {x:Type Label}}" >
+                <Setter Property="Foreground" Value="{StaticResource AroDarkGray}"/>
+            </Style>
+
+            <Style TargetType="{x:Type TextBox}">
+                <Setter Property="Height" Value="22"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+            </Style>
+
+            <Style TargetType="{x:Type TextBlock}">
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+
+            <Style TargetType="{x:Type GroupBox}">
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="{StaticResource AroGray}" />
+            </Style>
+            <Style TargetType="{x:Type ComboBox}" x:Key="CustomComboBoxStyle">
+                <Setter Property="Background" Value="Black"/>
+                <Setter Property="BorderBrush" Value="Red"/>
+            </Style>
+            <Style TargetType="{x:Type CheckBox}">
+                <Setter Property="Padding" Value="0"/>
+            </Style>
+            <Style TargetType="{x:Type ListView}">
+                <Setter Property="Background" Value="{StaticResource TransparentBrush}"/>
+            </Style>
+
+        </ResourceDictionary>
+    </Window.Resources>
+</Window>
