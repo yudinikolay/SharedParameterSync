@@ -12,15 +12,34 @@ namespace SharedParameterSync
         private readonly List<List<string>> _source1;
         private readonly List<List<string>> _source2;
 
-        internal MainViewModel()
+        private readonly string _docId;
+        private readonly string _filePath;
+        private readonly string _range;
+
+
+        //{
+        //  "FILE_PATH": "C:\\Users\\User\\Documents\\MyFile.txt",
+        //  "DOCUMENT_ID": "123456",
+        //  "RANGE": "IMPORT"
+        //}
+
+    internal MainViewModel()
         {
             Logger.New();
-            if (!SharedParameter.Items.ByRevitSharedParameterFile(Resources.FilePath, out _source1))
+
+            // Считать данные из файла settings.json
+            string settings = System.IO.File.ReadAllText("settings.json");
+            dynamic settingsObject = Newtonsoft.Json.JsonConvert.DeserializeObject(settings);
+            _filePath = settingsObject.FILE_PATH;
+            _docId = settingsObject.DOCUMENT_ID;
+            _range = settingsObject.RANGE;
+
+            if (!SharedParameter.Items.ByRevitSharedParameterFile(_filePath, out _source1))
             {
                 return;
             }
 
-            IList<IList<object>> table = Google.SpreadsheetConnector.ReadRangeFromTable(Resources.DocId, Resources.Range);
+            IList<IList<object>> table = Google.SpreadsheetConnector.ReadRangeFromTable(_docId, _range);
             if (!SharedParameter.Items.ByObjectsTable(table, out _source2))
             {
                 return;
@@ -90,11 +109,11 @@ namespace SharedParameterSync
             _sourceModel.ApplyChanges();
             if (!_flipped)
             {
-                Google.SpreadsheetConnector.WriteRangeToTable(Resources.DocId, Resources.Range, _sourceModel.AsObjectsTable());
+                Google.SpreadsheetConnector.WriteRangeToTable(_docId, _range, _sourceModel.AsObjectsTable());
             }
             else
             {
-                _sourceModel.WriteRevitSharedParameterFile(Resources.FilePath);
+                _sourceModel.WriteRevitSharedParameterFile(_filePath);
             }
             window.Close();
         }

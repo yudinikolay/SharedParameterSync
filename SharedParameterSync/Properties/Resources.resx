@@ -117,16 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DocId" xml:space="preserve">
-    <value>1d7kzUpNK7JVAQYcAI_K_3z3h1SYpYfktCVQ7y1IzVfU</value>
-    <comment>Google SpreadSheet Document Id</comment>
-  </data>
-  <data name="FilePath" xml:space="preserve">
-    <value>Z:\Libraries\ФОП\shared_parameters.txt</value>
-    <comment>Path to RevitSharedParameter file</comment>
-  </data>
-  <data name="Range" xml:space="preserve">
-    <value>IMPORT</value>
-    <comment>Google SpreadSheet Data Range (Named or Classic)</comment>
-  </data>
 </root>
