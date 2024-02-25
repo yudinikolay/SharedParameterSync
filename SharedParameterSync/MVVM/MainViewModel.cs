@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using SharedParameterSync.Properties;
 using MVVM;
 using Shared;
 
@@ -16,18 +15,15 @@ namespace SharedParameterSync
         private readonly string _filePath;
         private readonly string _range;
 
-
-        //{
-        //  "FILE_PATH": "C:\\Users\\User\\Documents\\MyFile.txt",
-        //  "DOCUMENT_ID": "123456",
-        //  "RANGE": "IMPORT"
-        //}
-
-    internal MainViewModel()
+        internal MainViewModel()
         {
             Logger.New();
 
-            // Считать данные из файла settings.json
+            //{
+            //  "FILE_PATH": "C:\\Users\\User\\Documents\\MyFile.txt",
+            //  "DOCUMENT_ID": "123456",
+            //  "RANGE": "IMPORT"
+            //}
             string settings = System.IO.File.ReadAllText("settings.json");
             dynamic settingsObject = Newtonsoft.Json.JsonConvert.DeserializeObject(settings);
             _filePath = settingsObject.FILE_PATH;
