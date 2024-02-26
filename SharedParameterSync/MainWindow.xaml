@@ -18,9 +18,10 @@
             <!--Направление "Чтение-запись"-->
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0"
                     d:Text="Запись из Гугла"
@@ -31,6 +32,9 @@
                 <TextBlock Grid.Column="2"
                     d:Text="в ФОПу"
                     Text="{Binding TargetName}"/>
+                <Button Grid.Column="3" Width="20"
+                    Content="⚙" 
+                    Command="{Binding SettingsCommand}"/>
             </Grid>
             
             <!--Список параметров-->

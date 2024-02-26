@@ -3,22 +3,33 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using MVVM;
 using Shared;
+using Microsoft.Win32;
+using System.Xaml;
 
 namespace SharedParameterSync
 {
     internal class MainViewModel : ViewModelBase
     {
-        private readonly List<List<string>> _source1;
-        private readonly List<List<string>> _source2;
+        private List<List<string>> _source1;
+        private List<List<string>> _source2;
 
-        private readonly string _docId;
-        private readonly string _filePath;
-        private readonly string _range;
+        public string DocId {  get; set; }
+        public string FilePath { get; set; }
+        public string Range { get; set; }
 
         internal MainViewModel()
         {
             Logger.New();
 
+            ReadSettings();
+
+            NewSources();
+
+            LoadSources();
+        }
+
+        private void ReadSettings()
+        {
             //{
             //  "FILE_PATH": "C:\\Users\\User\\Documents\\MyFile.txt",
             //  "DOCUMENT_ID": "123456",
@@ -26,22 +37,23 @@ namespace SharedParameterSync
             //}
             string settings = System.IO.File.ReadAllText("settings.json");
             dynamic settingsObject = Newtonsoft.Json.JsonConvert.DeserializeObject(settings);
-            _filePath = settingsObject.FILE_PATH;
-            _docId = settingsObject.DOCUMENT_ID;
-            _range = settingsObject.RANGE;
+            FilePath = settingsObject.FILE_PATH;
+            DocId = settingsObject.DOCUMENT_ID;
+            Range = settingsObject.RANGE;
+        }
 
-            if (!SharedParameter.Items.ByRevitSharedParameterFile(_filePath, out _source1))
+        private void NewSources()
+        {
+            if (!SharedParameter.Items.ByRevitSharedParameterFile(FilePath, out _source1))
             {
                 return;
             }
 
-            IList<IList<object>> table = Google.SpreadsheetConnector.ReadRangeFromTable(_docId, _range);
+            IList<IList<object>> table = Google.SpreadsheetConnector.ReadRangeFromTable(DocId, Range);
             if (!SharedParameter.Items.ByObjectsTable(table, out _source2))
             {
                 return;
             }
-
-            LoadSources();
         }
 
         public string SourceName { get; set; }
@@ -99,19 +111,66 @@ namespace SharedParameterSync
         }
 
         public RelayCommand OkCommand => new RelayCommand(obj => Ok(obj as Window));
-
         private void Ok(Window window)
         {
             _sourceModel.ApplyChanges();
             if (!_flipped)
             {
-                Google.SpreadsheetConnector.WriteRangeToTable(_docId, _range, _sourceModel.AsObjectsTable());
+                Google.SpreadsheetConnector.WriteRangeToTable(DocId, Range, _sourceModel.AsObjectsTable());
             }
             else
             {
-                _sourceModel.WriteRevitSharedParameterFile(_filePath);
+                _sourceModel.WriteRevitSharedParameterFile(FilePath);
             }
             window.Close();
         }
+
+        public RelayCommand SharedParFilePathCommand => new RelayCommand(obj => SharedParFilePath());
+
+        private void SharedParFilePath()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                InitialDirectory = FilePath,
+                Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*"
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string filePath = openFileDialog.FileName;
+                FilePath = filePath;
+                OnPropertyChanged(nameof(FilePath));
+            }
+        }
+
+        public RelayCommand SettingsCommand => new RelayCommand(obj => OpenSettings());
+        private Settings settingsWindow; 
+        private void OpenSettings()
+        {
+            if (settingsWindow == null || !settingsWindow.IsVisible)
+            {
+                settingsWindow = new Settings(this);
+                settingsWindow.Show();
+            }
+            else
+            {
+                settingsWindow.Focus();
+            }
+        }
+
+        public RelayCommand SaveSettingsCommand => new RelayCommand(obj => SaveSettings(obj as Window));
+        private void SaveSettings(Window window)
+        {
+            Dictionary<string, string> settings = new Dictionary<string, string>()
+            {
+                {"FILE_PATH", FilePath },{"DOCUMENT_ID", DocId },{"RANGE", Range }
+            };
+            string settingText = Newtonsoft.Json.JsonConvert.SerializeObject(settings);
+            System.IO.File.WriteAllText("settings.json", settingText);
+            window.Close();
+
+            NewSources();
+            LoadSources();
+        }
+
     }
 }

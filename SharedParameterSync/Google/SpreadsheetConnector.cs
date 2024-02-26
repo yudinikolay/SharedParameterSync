@@ -8,11 +8,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Text;
+using HandyControl.Tools;
 
 namespace Google
 {
     internal class SpreadsheetConnector
-
     {
         private const string ApplicationName = "Google Sheets Reader v.1";
         private const string TabSeparator = "\t";
@@ -58,14 +58,14 @@ namespace Google
         /// <returns>Экземпляр SheetsService.</returns>
         private static SheetsService GetServiceReadOnly()
         {
-            string credentialsPath = @"credentials.json";
+            string credentialsPath = @"Google\credentials.json";
             string tokenPath = @"token.json";
             return GetService(credentialsPath, tokenPath, FileMode.Open,FileAccess.Read);
         }
 
         private static SheetsService GetServiceWrite()
         {
-            string credentialsPath = @"credentials.json";
+            string credentialsPath = @"Google\credentials.json";
             string tokenPath = @"token.json";
             return GetService(credentialsPath, tokenPath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
         }
@@ -156,7 +156,7 @@ namespace Google
             request.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
             UpdateValuesResponse response = request.Execute();
 
-            Console.WriteLine("Данные успешно записаны в таблицу.");
+            Logger.Info("Данные успешно записаны в таблицу.");
         }
     }
 }
